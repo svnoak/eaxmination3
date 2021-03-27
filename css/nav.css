@@ -1,0 +1,20 @@
+nav {
+    width: 100%;
+    display: flex;
+    flex-basis: var(--hNav);
+    height: 50px;
+}
+
+nav > a {
+    text-decoration: none;
+    flex-grow: 1;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+nav > a.current {
+    border-bottom: none;
+    background-color: lightgrey;
+}

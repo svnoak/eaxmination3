@@ -1,0 +1,35 @@
+Specifikationer för Mladok:
+
+Syfte med sidan är att skapa sökfunktioner för att separat kunna söka på studenter och kurser.
+
+Sökfunktion för studenter:
+
+a) Söka på studenter utifrån efternamn
+b) Sökbegreppet ska vara case-insensitive
+c) Studenter sorteras automatiskt efter efternamn (a till ö)
+d) Kurser sorteras automatiskt efter termin (tidigaste först)
+e) Struktur på sökresultat är som följande:
+
+Namn på studenten ( Total antal credits: )
+Kurser:
+Kursnamn, Termin, antal credits
+
+Avslutade kurser (fullt antal credits) ska ha grön bakgrundsfärg
+
+Sökfunktion för kurser:
+
+a) Söka på kurser utifrån titel
+b) Sökbegreppet ska vara case-insensitive
+c) Kurser sorteras automatiskt efter titel (a till ö)
+d) Studenter sorteras automatiskt efter termin (tidigaste först)
+d) Struktur på sökresultat är som följande:
+
+Kurstitel ( Antal credits )
+Kursansvarig: Namn på kursansvarig och yrkestitel Lärare: Lista på alla lärare med för och efternamn och yrkestitel
+Studenter:
+Lista på studenter med följande information per student:
+Namn, antal credits, Termin
+
+Backgrundsfärg på kursansvarig är rosa
+
+Backgrundsfärg på studenter med avslutade kurser (fullt antal credits) ska ha grön bakgrundsfärg
