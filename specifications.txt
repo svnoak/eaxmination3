@@ -33,3 +33,30 @@ Namn, antal credits, Termin
 Backgrundsfärg på kursansvarig är rosa
 
 Backgrundsfärg på studenter med avslutade kurser (fullt antal credits) ska ha grön bakgrundsfärg
+
+
+
+Specifikationer extra funktionallitet (individuell uppgift):
+
+Välja en lista för antingen studenter. lärare eller kurser och få en översikt i en lista över alla dessa.
+Denna lista ska kunna sorteras och filtreras utifrån en filterfunktion som ska innehålla:
+
+Sortera studenter efter förnamn, efternamn, antal credits.
+Sortera lärare efter förnamn, efternamn, titel.
+Sortera kurser efter titel, credits.
+
+Kunna klicka på lärare för att se:
+Vilka kurser denna är med i och för vilka kurser denna är ansvarig
+
+Klicka på student för att se:
+Vilka kurser denna är med i, vilka kurser som är godkända
+Hur många credits i varje kurs
+
+Klicka på kurser för att se:
+Vilka lärare som ansvariga / undervisar kursen
+Hur många studenter som har varit inskrivna på kursen totalt
+Vilka studenter som har varit i kursen och klarat den eller ej.
+
+
+Kunna klicka vidare från varje objekt (lärare, student, kurs) till nästa utan att behöva byta sida.
+Eventuellt en tillbaka knapp?

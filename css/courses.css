@@ -1,1 +1,83 @@
+.course {
+    background-color: white;
+    border-radius: 10px;
+    padding: 1%;
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0.5%;
+    box-shadow: 0px 0px 3px black;
+}
 
+.course > h2 {
+    margin: 5px 0;
+}
+
+.course > div {
+    display: flex;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.staff {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-left: 10%;
+}
+
+.staff > h3 {
+    width: 100%;
+}
+
+.staff > div > div > span,
+.resp > div > span {
+    background-color: white;
+    border: 1px solid grey;
+    border-radius: 5px;
+    padding: 5px;
+    margin: 2px;
+}
+
+.resp > div > span {
+    background-color: pink;
+}
+
+.course > div:first-child {
+    width: 100%;
+}
+
+.course > div:first-child > h3 {
+    color: grey;
+}
+
+.course {
+    border-radius: 10px;
+    padding: 1%;
+    margin: 1px;
+    border: 1px solid grey;
+}
+
+.course > h4 {
+    margin: 0;
+}
+
+.students {
+    display: flex;
+    flex-direction: column;
+}
+
+.list {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.student {
+    background-color: white;
+    border-radius: 10px;
+    padding: 1%;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    margin: 0.5%;
+    border: 1px solid grey;
+}

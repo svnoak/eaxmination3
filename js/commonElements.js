@@ -126,14 +126,9 @@ function DOMFilter(data){
     input.addEventListener("keyup", function(){
         filterLabelKey = this.value;
         filterLabelKey = filterLabelKey.toLowerCase();
-        
         clear();
-
         let filteredArray = baseArray.filter( obj => obj[filterKey].toLowerCase().includes(filterLabelKey) );
-
-    if(filterLabelKey) data.DOMCreator(filteredArray);
-
-
+        if(filterLabelKey) data.DOMCreator(filteredArray);
     });
 
     return container;    

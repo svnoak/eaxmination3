@@ -426,6 +426,7 @@ const STUDENTS = [
                 {courseID:19,"started":{semester:"Autumn",year:2019},passedCredits:1},
                 {courseID:8,"started":{semester:"Spring",year:2015},passedCredits:5}]}
 ];
+
 const COURSES = [
     {
         courseID:0,
@@ -464,6 +465,7 @@ const COURSES = [
     {courseID:28,title:"Poetry of the Middle Ages",totalCredits:7.5,teachers:[3,0],courseResponsible:3},
     {courseID:29,title:"History of the Romantic Age",totalCredits:7.5,teachers:[7,5],courseResponsible:7}
 ];
+
 const TEACHERS = [
     {
         teacherID: 0,

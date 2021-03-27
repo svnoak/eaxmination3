@@ -1,3 +1,33 @@
 .student {
-    
+    background-color: white;
+    border-radius: 10px;
+    padding: 1%;
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0.5%;
+    box-shadow: 0px 0px 3px black;
+}
+
+.student > h2 {
+    margin: 5px 0;
+    width: 100%;
+}
+
+.student > div:first-child {
+    width: 100%;
+}
+
+.student > div:first-child > h3 {
+    color: grey;
+}
+
+.course {
+    border-radius: 10px;
+    padding: 1%;
+    margin: 1px;
+    border: 1px solid grey;
+}
+
+.course > h4 {
+    margin: 0;
 }

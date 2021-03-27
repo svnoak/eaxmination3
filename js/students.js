@@ -30,6 +30,10 @@ let data = {
     filterLabelName: "Search Studenst By Last Name",
     filterLabelKey: "",
     DOMCreator(array) {
+        let started = "started"; // to access "started" key in courses object
+        array.sort( (a, b) => a.lastName.toLowerCase() > b.lastName.toLowerCase() );
+        array.forEach( arr => arr.courses.sort( (a, b)  => a[started].year - b[started].year || a[started].semester.toLowerCase() < b[started].semester.toLowerCase() ));
+
         array.forEach( student => {
             student.totalCredits = student.courses.map( course => course.passedCredits).reduce((prev, next) => prev + next);
             document.querySelector(".listContainer").append(DOMStudent(student));
@@ -63,43 +67,49 @@ function DOMStudent(student){
     container.append(studentName(student.firstName, student.lastName, student.totalCredits));
 
     // Add Courses
-    student.courses.forEach( course => container.append(studentCourses(student, course)) );
-    
-    // studentCourses(student.courses);
-
+    student.courses.forEach( course => container.append(studentCourses(course)) );
 
     return container;
 
-    
-    
-    
-    
+
     // We can put these declarations after the return because they are function declarations,
     // not "normal" executable code. "Normal" executable code is not executed
     // if it is placed after a return instruction.
 
     function studentName(firstName, lastName, totalCredits){
         
-        let container = document.createElement("h2");
-        container.textContent = `${firstName} ${lastName} (total: ${totalCredits} credits)`;
+        let container = document.createElement("div");
 
+        let studentTitle = document.createElement("h2");
+        studentTitle.textContent = `${firstName} ${lastName} (total: ${totalCredits} credits)`;
+
+        let courseTitle = document.createElement("h3");
+        courseTitle.textContent = "Courses:";
+
+        container.appendChild(studentTitle);
+        container.appendChild(courseTitle);
+        
         return container;
     }
 
-    function studentCourses(student, course){
+    function studentCourses(course){
         let courseName = COURSES.find( c => c.courseID == course.courseID ).title;
         let courseCredit = COURSES.find( c => c.courseID == course.courseID ).totalCredits;
-        let container = document.createElement("div");
-        let title = document.createElement("h4");
-        title.textContent = courseName;
+        let started = "started"; // to access "started" key in courses object
 
-        container.appendChild(title);
+        let container = document.createElement("div");
+        container.classList.add("course");
+
+        let courseTitle = document.createElement("h4");
+        courseTitle.textContent = courseName;
+
+        container.appendChild(courseTitle);
 
         let info = document.createElement("span");
+        info.textContent = `${course[started].semester} ${course[started].year} ${course.passedCredits} of ${courseCredit}`;
+        if ( course.passedCredits == courseCredit ) container.style.backgroundColor = "lightgreen";
 
         container.appendChild(info);
-
-        console.log(student.courses.semester);
 
         return container;
      }
