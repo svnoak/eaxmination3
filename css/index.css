@@ -1,0 +1,127 @@
+html {overflow: scroll;}
+
+main {
+    display: flex;
+    flex-direction: row-reverse;
+    font-family: sans-serif;
+}
+
+.sidebar {
+    width: 30%;
+    margin: 25px;
+}
+
+.menu {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.menu button {
+    background-color: white;
+    height: 50px;
+    flex-grow: 1;
+    border: 1px solid grey;
+    box-shadow: 0 0 2px rgba(0,0,0,0.15);
+    color: grey;
+}
+
+.menu button:first-of-type {
+    border-radius: 5px 0 0 5px;
+}
+
+.menu button:last-of-type {
+    border-radius: 0 5px 5px 0px;
+}
+
+.menu button:hover {
+    cursor: pointer;
+    transition: ease-in-out 0.2s;
+    color: black;
+}
+
+.menu button:active {
+    background-color: #009879;
+    color: white;
+}
+
+.menu .active,
+.menu .active:hover{
+    background-color: #009879;
+    color: white;
+}
+
+.content-table{
+    border-collapse: collapse;
+    margin: 25px;
+    font-size: 0.9em;
+    min-width: 800px;
+    height: 100%;
+    border-radius: 5px 5px 0 0;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0,0,0,0.15);
+}
+
+.content-table thead tr {
+   background-color: #009879;
+   color: white;
+   text-align: left;
+   font-weight: bold;
+   height: 50px;
+}
+
+.content-table th,
+.content-table td {
+    padding: 12px 15px;
+}
+
+.content-table tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+.content-table tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+}
+
+.content-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.content-table tbody tr.active-row {
+    font-weight: bold;
+    color: #009879;
+}
+
+.row {
+    height: 10px;
+    cursor: pointer;
+}
+
+.row td {
+    font-weight: 400;
+    color: black;
+}
+
+.course td:last-of-type {
+    text-align: right;
+    padding-right: 15px
+}
+
+tbody .active {
+    font-weight: bold;
+    color: #009879;
+}
+
+.fas-arrow-down {
+    font-size: 1em;
+}
+
+i {
+    width: 10px;
+    color: grey;
+    transform: rotate(0);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: ease-in-out .2s;
+}

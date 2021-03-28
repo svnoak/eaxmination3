@@ -3,20 +3,30 @@ nav {
     display: flex;
     flex-basis: var(--hNav);
     height: 50px;
-    z-index: 2;
+    justify-content: space-between;
 }
 
 nav > a {
     text-decoration: none;
-    flex-grow: 1;
-
     display: flex;
     justify-content: center;
     align-items: center;
-    border: 1px solid grey;
+    background-color: lightgrey;
+    box-shadow: 0 0 15px rgba(0,0,0,0.15);
+    width: 32%;
+    border-radius: 5px 5px 0 0;
+    color: white;
 }
 
 nav > a.current {
     border-bottom: none;
-    background-color: lightgrey;
+    background-color: white;
+    font-weight: bold;
+    color: #009879;
+}
+
+nav > a:hover {
+    background-color: white;
+    color: #009879;
+    transition: ease-in-out 0.2s;
 }

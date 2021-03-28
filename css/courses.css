@@ -1,15 +1,19 @@
 .course {
     background-color: white;
-    border-radius: 10px;
-    padding: 1%;
+    border-radius: 5px;
+    padding: 25px;
     display: flex;
     flex-wrap: wrap;
     margin: 0.5%;
-    box-shadow: 0px 0px 3px black;
+    box-shadow: 0px 0px 15px rgba(0,0,0,0.15);
 }
 
 .course > h2 {
-    margin: 5px 0;
+    margin: 0px;
+}
+
+.course > div:first-of-type {
+    font-size: 2rem;
 }
 
 .course > div {
@@ -50,13 +54,6 @@
     color: grey;
 }
 
-.course {
-    border-radius: 10px;
-    padding: 1%;
-    margin: 1px;
-    border: 1px solid grey;
-}
-
 .course > h4 {
     margin: 0;
 }
@@ -75,9 +72,9 @@
     background-color: white;
     border-radius: 10px;
     padding: 1%;
+    margin: 1px;
     display: flex;
     flex-direction: column;
     flex-wrap: wrap;
-    margin: 0.5%;
     border: 1px solid grey;
 }

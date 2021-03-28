@@ -40,14 +40,8 @@ let data = {
         });
     }
 };
+
 main.prepend(DOMFilter(data));
-
-
-
-
-
-
-
 
 // Här kodar du funktionen som ska skapa DOM-elementet för varje student.
 // Se videon för detaljer om vad som ska ingå i elementet.
@@ -100,14 +94,17 @@ function DOMStudent(student){
         let container = document.createElement("div");
         container.classList.add("course");
 
-        let courseTitle = document.createElement("h4");
+        let courseTitle = document.createElement("span");
         courseTitle.textContent = courseName;
 
         container.appendChild(courseTitle);
 
         let info = document.createElement("span");
         info.textContent = `${course[started].semester} ${course[started].year} ${course.passedCredits} of ${courseCredit}`;
-        if ( course.passedCredits == courseCredit ) container.style.backgroundColor = "lightgreen";
+        if ( course.passedCredits == courseCredit ) {
+            container.style.backgroundColor = "#009879";
+            container.style.color = "white";
+        }
 
         container.appendChild(info);
 

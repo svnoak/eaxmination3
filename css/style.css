@@ -1,7 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@200;400;700&display=swap');
+
 body{
     display: flex;
     flex-direction: column;
-    align-items: space-between;
+    font-family: 'Nunito', sans-serif;
+    z-index: -2;
 }
 
 header {
@@ -12,17 +15,29 @@ header {
 }
 
 main {
-    background-color: lightgrey;
+    background-color: white;
     padding: 5px;
-    border: 1px solid grey;
     border-top: none;
     min-height: calc(100vh - 250px);
+    z-index: 2;
+    box-shadow: 0 15px 15px rgba(0,0,0,0.15);
 }
 
 .listContainer {
     display: flex;
     flex-direction: column;
     flex-wrap: wrap;
+}
+
+.filter {
+    padding: 25px;
+}
+
+input {
+    height: 20px;
+    border-radius: 5px;
+    border: 1px solid grey;
+    padding: 5px;
 }
 
 footer {

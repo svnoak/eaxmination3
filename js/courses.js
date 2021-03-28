@@ -186,7 +186,10 @@ function DOMCourse(course){
             courseInfo.textContent = `${ student.semester } ${ student.year }`;
             containerStudent.appendChild( courseInfo );
 
-            if( student.passedCredits == course.totalCredits ) containerStudent.style.backgroundColor = "lightgreen";
+            if( student.passedCredits == course.totalCredits ) {
+                containerStudent.style.backgroundColor = "#009879";
+                containerStudent.style.color = "white";
+            }
 
             containerStudents.querySelector(".list").append(containerStudent);
         });
