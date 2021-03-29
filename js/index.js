@@ -14,7 +14,6 @@ studentjs.setAttribute("src", "css/students.js");
 let coursesjs = document.createElement("script");
 coursesjs.setAttribute("src", "css/courses.js");
 
-
 document.querySelector("head").appendChild(fontawesome);
 document.body.prepend(studentjs);
 document.body.prepend(coursesjs);
@@ -24,6 +23,12 @@ let dataset = {
     courses: COURSES,
     teachers: TEACHERS,
     filterKey: "students"
+};
+
+const details = {
+    students: showStudentInformation,
+    courses: showCourseInformation,
+    teachers: showTeacherInformation
 };
 
 // Lägger till ett generellt table element.
@@ -37,6 +42,87 @@ let table = document.querySelector("table");
 renderTableSet(dataset);
 main.prepend(sidebar());
 
+function generateDetailsHead(keys, parentRow) {
+
+    let row = document.createElement("tr");
+    row.className="details";
+    createHead( keys, row );
+
+    parentRow.after(row);
+}
+
+function showStudentInformation(set, key, parentRow) {
+    if (typeof(set[key]) == "object") {
+
+        let courseKeys;
+
+        set[key].forEach( c => {
+            let tr = document.createElement("tr");
+            tr.className = "details";
+            let course = COURSES.find( course => course.courseID == c.courseID);
+            courseKeys = Object.keys(course);
+            courseKeys.forEach( key => {
+
+                if( key == "teachers") {
+                    let teacherID = course[key];
+                    teacherID.forEach( id => {
+                        let staff = document.createElement("li");
+                        let firstName = TEACHERS.find( teacher => teacher.teacherID == id ).firstName;
+                        let lastName = TEACHERS.find( teacher => teacher.teacherID == id ).lastName;
+                        let post = TEACHERS.find( teacher => teacher.teacherID == id ).post;
+                        staff.textContent = `${firstName[0]} ${lastName} (${post})`;
+                        tr.appendChild(staff);
+                    });
+                }
+
+                // if ( key == "courseResponsible") {
+                //     let id = [TEACHERS.find( teacher => teacher.teacherID == course.courseResponsible ).teacherID];
+                //     let firstName = TEACHERS.find( teacher => teacher.teacherID == id ).firstName;
+                //     let lastName = TEACHERS.find( teacher => teacher.teacherID == id ).lastName;
+                //     let post = TEACHERS.find( teacher => teacher.teacherID == id ).post;
+                //     let resp = document.createElement("li");
+                //     resp.textContent = `${firstName[0]} ${lastName} (${post})`;
+                //     tr.appendChild(resp);
+                // }
+                else {
+                let td = document.createElement("td");
+                td.textContent = course[key];      
+                tr.appendChild(td);
+                }
+            })
+            parentRow.after(tr);
+        })
+        generateDetailsHead(courseKeys, parentRow);
+    }
+}
+
+function showCourseInformation(){}
+
+function showTeacherInformation(){}
+
+function collapseRow() {
+    event.stopPropagation();
+    let row = this;
+
+    if ( row.nextSibling.className != "details" ) {
+
+        row.querySelectorAll("td").forEach( td => td.classList.add("selected") );
+
+        let id = row.children[1].textContent;
+        let set = dataset[dataset.filterKey][id];
+
+        Object.keys(set).forEach( key => details[dataset.filterKey](set, key, row) );
+        row.lastChild.children[0].style.transform = "rotate(180deg)";
+    }
+
+    else {
+        while(row.nextSibling.classList.contains("details")) row.nextSibling.remove();
+
+        row.querySelectorAll("td").forEach( td => td.classList.remove("selected") );
+        row.lastChild.children[0].style.transform = "rotate(0)";
+    }
+}
+
 // Kollar vilken Filterkey som används och skickar vidare rätt dataset för att generera table
 function renderTableSet(dataset) {  
     let dataKeys = Object.keys(dataset[dataset.filterKey][0]);
@@ -49,6 +135,7 @@ function renderTableSet(dataset) {
 }
 
 function generateTableHead(table, data) {
+    
     let thead = table.createTHead();
     let row = thead.insertRow();
     
@@ -56,17 +143,13 @@ function generateTableHead(table, data) {
 
     // Lägger manuellt till en extra key för pilarna
     data.push("");
+    createHead(data, row);
+}
+
+function createHead(data, row) {
     for ( let key of data ) {
-
-        // Lägger till mellanrum och gör allt uppercase
-        key.includes("ID") ? 
-        key = key.split(/(?=[I])/)[0].toUpperCase() + " " +  key.split(/(?=[I])/)[1] :
-        key = key.split(/(?=[A-Z])/).length == 1 ?
-        key = key.split(/(?=[A-Z])/)[0].toUpperCase() :
-        key = key.split(/(?=[A-Z])/)[0].toUpperCase() + " " +  key.split(/(?=[A-Z])/)[1].toUpperCase();
-
         let th = document.createElement("th");
-        let text = document.createTextNode(key);
+        let text = document.createTextNode(capitaliseKeys(key));
         th.appendChild(text);
         row.appendChild(th);
     }
@@ -167,58 +250,15 @@ function setActiveButton(btn) {
     btn.classList.add("active");
 }
 
-function collapseRow() {
-    event.stopPropagation();
-    let row = this;
-
-    if ( row.nextSibling.className != "details" ) {
-
-        row.querySelectorAll("td").forEach( td => td.style.fontWeight = "bold" );
-
-        let id = row.children[1].textContent;
-        let container = document.createElement("tr");
-        container.className = "details";
-        let div = document.createElement("div");
-        
-        let set = dataset[dataset.filterKey][id];
-        
-        Object.keys(set).forEach( key => {
-            
-                if (typeof(set[key]) == "object") {
-                    set[key].forEach( c => {
-
-                        /*
-                        
-                        Jag håller på att hitta varje students kurs för collapsiga raderna i tabellen.
-                        Vill nog gärna fixa in en till tabell kanske? Oavsett vill jag kunna bearbeta om personen är med i kursen eller inte.
-                        
-                        */
-                        let course = COURSES.find( course => course.courseID == c.courseID);
-                        let courseName = course.title;
-                        
-                        let span = document.createElement("li");
-                        span.textContent = courseName;
-
-                        div.appendChild(span);
-                    })
-                }
-
-        } );
-        container.appendChild(div);
-
-        row.after(container);
-
-        row.lastChild.children[0].style.transform = "rotate(180deg)";
-
-    }
-
-    else {
-        row.nextSibling.remove();
-        row.querySelectorAll("td").forEach( td => td.style.fontWeight = "normal" );
-        row.lastChild.children[0].style.transform = "rotate(0)";
-    }
-}
-
 function selectingRow() {
     event.stopPropagation();
+}
+
+function capitaliseKeys(key) {
+    key.includes("ID") ? 
+        key = key.split(/(?=[I])/)[0].toUpperCase() + " " +  key.split(/(?=[I])/)[1] :
+        key = key.split(/(?=[A-Z])/).length == 1 ?
+        key = key.split(/(?=[A-Z])/)[0].toUpperCase() :
+        key = key.split(/(?=[A-Z])/)[0].toUpperCase() + " " +  key.split(/(?=[A-Z])/)[1].toUpperCase();
+    return key;
 }

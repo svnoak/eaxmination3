@@ -112,6 +112,26 @@ tbody .active {
     color: #009879;
 }
 
+tbody > tbody {
+    background-color: green;
+}
+
+.row .selected {
+    font-weight: bold;
+    background-color: #009879;
+    color: white;
+    border-top: 2px solid white;
+}
+
+.row .selected i {
+    color: white;
+}
+
+.details th{
+    background-color: #00382D;
+    color: white;
+}
+
 .fas-arrow-down {
     font-size: 1em;
 }
@@ -123,5 +143,5 @@ i {
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: ease-in-out .2s;
+    transition: transform ease-in-out .2s;
 }

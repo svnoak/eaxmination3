@@ -202,9 +202,7 @@ function DOMCourse(course){
 // Eftersom du behöver skapa Teachers i två olika platser (under Course Responsible ochunder Teachers)
 // så är det enda rimliga att skapa en funktion som tar emot info om läraren och returnerar
 // ett DOM-element som kan appendas på rätt ställe.
-function DOMTeacher( teacherID ){
-    console.log(teacherID);
-        
+function DOMTeacher( teacherID ){ 
     let container = document.createElement("div");        
 
     teacherID.forEach( id => {
