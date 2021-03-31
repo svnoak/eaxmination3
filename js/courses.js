@@ -26,9 +26,9 @@ main.innerHTML = `
 
 let data = {
     baseArray: COURSES,
-    filterKey: "",
-    filterLabelName: "Search Courses By Title",
     filterKey: "title",
+    filterLabelName: "Search Courses By Title",
+    filterLabelKey: "",
     DOMCreator(array) {
         array.sort( (a, b) => a.title.toLowerCase() > b.title.toLowerCase() );
         array.forEach(course => {

@@ -1,10 +1,5 @@
 "use strict";
 
-
-// Add specific <head> stuff
-// Here's where you add <link> and <title>, specific to this page
-// Dataset så man kommer åt de olika arrayn variabelt.
-
 let fontawesome = document.createElement("script");
 fontawesome.setAttribute("src","https://kit.fontawesome.com/0bbe81ee43.js");
 fontawesome.setAttribute("crossorigin","anonymous");
@@ -22,7 +17,7 @@ let dataset = {
     students: STUDENTS,
     courses: COURSES,
     teachers: TEACHERS,
-    filterKey: "students"
+    filterKey: "teachers"
 };
 
 const details = {
@@ -31,7 +26,7 @@ const details = {
     teachers: showTeacherInformation
 };
 
-// Lägger till ett generellt table element.
+// Lägger till ett generellt table element + sidebar
 const main = document.querySelector("main");
 let tableEl = document.createElement("table");
 tableEl.className = "content-table";
@@ -40,17 +35,26 @@ main.prepend(tableEl);
 let table = document.querySelector("table");
 
 renderTableSet(dataset);
-main.prepend(sidebar());
+renderSidebar(dataset.filterKey);
 
+let searchbar = document.getElementById("searchbar");
+searchbar.addEventListener("keyup", function(){ searchTable(this) });
+
+// För att kunna ta bort antingen table eller sidebar filterfunktioner för omrendering
+const site = {
+    clearTable() { table.innerHTML = ""; },
+    clearSidebar() { document.querySelector(".sidebar div:last-child").remove() }
+}
+
+// Skapar detaljradhuvuden
 function generateDetailsHead(keys, parentRow) {
-
     let row = document.createElement("tr");
     row.className="details";
     createHead( keys, row );
-
     parentRow.after(row);
 }
 
+// Detaljrader för studenterna
 function showStudentInformation(set, key, parentRow) {
     if (typeof(set[key]) == "object") {
 
@@ -65,25 +69,29 @@ function showStudentInformation(set, key, parentRow) {
 
                 if( key == "teachers") {
                     let teacherID = course[key];
+                    let td = document.createElement("td");
                     teacherID.forEach( id => {
                         let staff = document.createElement("li");
                         let firstName = TEACHERS.find( teacher => teacher.teacherID == id ).firstName;
                         let lastName = TEACHERS.find( teacher => teacher.teacherID == id ).lastName;
                         let post = TEACHERS.find( teacher => teacher.teacherID == id ).post;
-                        staff.textContent = `${firstName[0]} ${lastName} (${post})`;
-                        tr.appendChild(staff);
+                        staff.textContent = `${firstName[0]} ${lastName}`;
+                        td.appendChild(staff);
                     });
+                    tr.appendChild(td);
                 }
 
-                // if ( key == "courseResponsible") {
-                //     let id = [TEACHERS.find( teacher => teacher.teacherID == course.courseResponsible ).teacherID];
-                //     let firstName = TEACHERS.find( teacher => teacher.teacherID == id ).firstName;
-                //     let lastName = TEACHERS.find( teacher => teacher.teacherID == id ).lastName;
-                //     let post = TEACHERS.find( teacher => teacher.teacherID == id ).post;
-                //     let resp = document.createElement("li");
-                //     resp.textContent = `${firstName[0]} ${lastName} (${post})`;
-                //     tr.appendChild(resp);
-                // }
+                else if ( key == "courseResponsible") {
+                    let td = document.createElement("td");
+                    let id = [TEACHERS.find( teacher => teacher.teacherID == course.courseResponsible ).teacherID];
+                    let firstName = TEACHERS.find( teacher => teacher.teacherID == id ).firstName;
+                    let lastName = TEACHERS.find( teacher => teacher.teacherID == id ).lastName;
+                    let post = TEACHERS.find( teacher => teacher.teacherID == id ).post;
+                    let resp = document.createElement("li");
+                    resp.textContent = `${firstName[0]} ${lastName}`;
+                    td.appendChild(resp);
+                    tr.appendChild(td);
+                }
                 else {
                 let td = document.createElement("td");
                 td.textContent = course[key];      
@@ -96,67 +104,136 @@ function showStudentInformation(set, key, parentRow) {
     }
 }
 
-function showCourseInformation(){}
+// Detaljrader för kurserna
+function showCourseInformation(set, key, parentRow){
+        let value = set[key];
 
-function showTeacherInformation(){}
+        let teacherKeys;
+        
+        if ( key == "teachers" || key == "courseResponsible" ) {
+        if (typeof(value) == "number") value = [value];
+        if ( value.length > 1 ) {
+            let index = set.teachers.indexOf(set.courseResponsible);
+            value.splice(index,1);
+        }
+            value.forEach( id => {
+                let tr = document.createElement("tr");
+                tr.className = "details";
+                let teacher = TEACHERS.find( teacher => teacher.teacherID == id );
+                teacher.role = key == "teachers" ? "Teacher" : "Course Responsible";
+                teacherKeys = Object.keys(teacher);
+                Object.keys(teacher).forEach( key => {
+                    let td = document.createElement("td");
+                    td.textContent = teacher[key];
+                    tr.append(td);
+                })
+                parentRow.after(tr);
+            })
+            generateDetailsHead(teacherKeys, parentRow);
+        }
+}
 
-function collapseRow() {
+// Detaljrader för lärarna
+function showTeacherInformation(set, key, parentRow){
+    let id;
+    let courseKeys;
+    if ( typeof(set[key]) == "number" ) id = set[key];
+    
+    if (id || id == 0) {
+        let courses = COURSES.filter( course => course.teachers.includes(id) || course.courseResponsible == id );
+        courses.forEach( course => {
+            let tr = document.createElement("tr");
+            tr.className = "details";
+            courseKeys = Object.keys(course);
+            courseKeys.splice(3, 3);
+            courseKeys.push("Role", "");
+            console.log(courseKeys);
+            courseKeys.forEach( key => {
+                let td = document.createElement("td");
+                td.textContent = course[key];
+                if ( key == "Role" ) td.textContent = course.courseResponsible == id ? "Responsible" : "Teacher";
+                tr.append(td);
+            })
+            parentRow.after(tr);
+        })
+        generateDetailsHead(courseKeys, parentRow);
+    }
+}
+
+// Collapsar raderna, sortering fixar också att raderna collapsar.
+// De tas bort varje gång för att vara uppdaterade nästa gång de renderas ifall datan skulle ha ändrats.
+// Finns en skillnad om alla tas bort eller om bara siblingen till den som man klickade tar bort
+function collapseRow(row, remove) {
     event.stopPropagation();
-    let row = this;
-
-    if ( row.nextSibling.className != "details" ) {
-
-        row.querySelectorAll("td").forEach( td => td.classList.add("selected") );
-
-        let id = row.children[1].textContent;
-        let set = dataset[dataset.filterKey][id];
-
-        Object.keys(set).forEach( key => details[dataset.filterKey](set, key, row) );
-        row.lastChild.children[0].style.transform = "rotate(180deg)";
+    if (remove) {
+        // Om det är sista elementet i tabellen så finns det inget sibling.
+        let siblingExists = (row.nextSibling == null || row.nextSibling.className != "details") ? true : false; 
+        if ( siblingExists ) {
+            row.querySelectorAll("td").forEach( td => td.classList.add("selected") );
+            let id = row.children[1].textContent;
+            let set = dataset[dataset.filterKey][id];
+            Object.keys(set).forEach( key => details[dataset.filterKey](set, key, row) );
+            row.lastChild.children[0].style.transform = "rotate(180deg)";
+        }
+        else { removeDetails(row); }
     }
 
-    else {
-        while(row.nextSibling.classList.contains("details")) row.nextSibling.remove();
+    else { removeDetails(row); };
 
+    function removeDetails(row) {
+        try { while(row.nextSibling.classList.contains("details")) row.nextSibling.remove(); } catch{}
         row.querySelectorAll("td").forEach( td => td.classList.remove("selected") );
         row.lastChild.children[0].style.transform = "rotate(0)";
     }
 }
 
 // Kollar vilken Filterkey som används och skickar vidare rätt dataset för att generera table
-function renderTableSet(dataset) {  
+function renderTableSet(array) {
+    array = array[dataset.filterKey] || array;
     let dataKeys = Object.keys(dataset[dataset.filterKey][0]);
-
+    
     // Lägger manuellt till en extra key för checkboxarna
     dataKeys.unshift("select");
-
     generateTableHead(table, dataKeys);
-    generateTableBody(table, dataset[dataset.filterKey]);
+    generateTableBody(table, array);
 }
 
+// Skapar en tablehead utifrån 
 function generateTableHead(table, data) {
-    
     let thead = table.createTHead();
     let row = thead.insertRow();
     
     data = data.splice(0,4);
 
-    // Lägger manuellt till en extra key för pilarna
+    // Lägger manuellt till en extra key för pilarna för att de inte ska ha en titel.
     data.push("");
     createHead(data, row);
+
+    for ( let i in table.querySelectorAll("thead tr th")) {
+        i = i++;
+        if (!isNaN(i)) {
+            table.querySelectorAll("thead tr th")[i].className = ".headerbtn";
+            table.querySelectorAll("thead tr th")[i].addEventListener("click", () => {
+            sortTable(i);
+            })
+        }
+    }
 }
 
+// Skapar Table head, oavsett om inne i TableBody eller det övergripande head.
 function createHead(data, row) {
     for ( let key of data ) {
         let th = document.createElement("th");
+        let arrow = document.createElement("i");
         let text = document.createTextNode(capitaliseKeys(key));
+        arrow.appendChild(th);
         th.appendChild(text);
         row.appendChild(th);
     }
 }
 
+// Skapar TableBody
 function generateTableBody(table, data) {
-
     let tbody = table.createTBody();
 
     for (let element of data) {
@@ -168,7 +245,9 @@ function generateTableBody(table, data) {
         }, {});
 
     let row = tbody.insertRow();
-    row.addEventListener("click", collapseRow);
+    row.addEventListener("click", function() {
+        collapseRow(this, true);
+    });
 
     let checkContainer = document.createElement("td");
 
@@ -199,23 +278,22 @@ function generateTableBody(table, data) {
 
 // Lägger till en sidebar som har nkappar för att välja vilken array vi vill ha
 // Och en search bar, kommer till lite olika filterfunktioner och en exportfunktion.
-function sidebar() {
+function renderSidebar() {
     let sidebar = document.createElement("div");
     sidebar.className = "sidebar";
     sidebar.appendChild(tableChoice());
     let sidebarChoices = document.createElement("div");
     sidebarChoices.innerHTML = `
     <label>Search:</label>
-    <input id="searchbar" placeholder="..."></input>  
+    <input id="searchbar" placeholder="..."></input>
     `;
 
     sidebar.appendChild(sidebarChoices);
-
-    return sidebar;
+    main.prepend(sidebar);
 }
 
+// Skapa knapparna som man kan välja mellan tabeller med. Den skapar så många knappar som det finns datasets.
 function tableChoice() {
-    
     let menu = document.createElement("div");
     menu.className = "menu";
     
@@ -227,33 +305,46 @@ function tableChoice() {
         let button = document.createElement("button");
         button.textContent = choice;
         if ( choice.toLowerCase() == dataset.filterKey ) button.classList.add("active");
-        button.addEventListener("click", filterTable);
+        button.addEventListener("click", function() {chooseTable(dataset)});
         menu.appendChild(button);
     })
 
     return menu;
 }
 
-function filterTable() {
-    dataset.filterKey = this.textContent.toLowerCase();
-    clearTable();
-    renderTableSet(dataset);
-    setActiveButton(this);
+// Söka i tabell i sökfältet
+function searchTable(search) {
+    let searchKey = search.value.toLowerCase();
+    let filteredArray;
+    if ( dataset.filterKey == "courses" ) filteredArray = dataset[dataset.filterKey].filter( obj => obj.title.toLowerCase().includes(searchKey) );
+    if ( dataset.filterKey != "courses" ) filteredArray = dataset[dataset.filterKey].filter( obj => obj.firstName.toLowerCase().includes(searchKey) ||  obj.lastName.toLowerCase().includes(searchKey) );
+    site.clearTable();
+    renderTableSet(filteredArray);
 }
 
-function clearTable() {
-    table.innerHTML = "";
+// välja vilken tabell som ska visas
+function chooseTable(array) {
+    if( event.target.textContent.toLowerCase() != dataset.filterKey ) {
+        dataset.filterKey = event.target.textContent.toLowerCase();
+        site.clearTable();
+        renderTableSet(array);
+        setActiveButton();
+    }
 }
 
-function setActiveButton(btn) {
+// Sätter knappen som väljer tabell till active
+function setActiveButton() {
+    let btn = document.querySelectorAll(".menu button");
     document.querySelectorAll(".menu button").forEach( btn => btn.classList.remove("active") );
-    btn.classList.add("active");
+    btn.forEach( btn => { if (btn.textContent.toLowerCase() == dataset.filterKey) btn.classList.add("active") } );
 }
 
+// För att kunna putta in objekten och ladda ner.
 function selectingRow() {
     event.stopPropagation();
 }
 
+// Gör keys stora som ska stå i head som rubriker/titlar
 function capitaliseKeys(key) {
     key.includes("ID") ? 
         key = key.split(/(?=[I])/)[0].toUpperCase() + " " +  key.split(/(?=[I])/)[1] :
@@ -262,3 +353,55 @@ function capitaliseKeys(key) {
         key = key.split(/(?=[A-Z])/)[0].toUpperCase() + " " +  key.split(/(?=[A-Z])/)[1].toUpperCase();
     return key;
 }
+
+// Sorting the table when clicking on the head (only main head)
+function sortTable(n) {
+
+    var rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    switching = true;
+
+    table.querySelectorAll(".row").forEach( row => collapseRow(row, false) );
+
+    dir = "asc"; 
+
+    while (switching) {
+
+      switching = false;
+      rows = table.rows;
+      for (i = 1; i < (rows.length - 1); i++) {
+
+        shouldSwitch = false;
+
+        x = rows[i].getElementsByTagName("td")[n];
+        y = rows[i + 1].getElementsByTagName("td")[n];
+
+        let a = parseInt(x.innerHTML) || x.innerHTML.toLowerCase();
+        let b = parseInt(y.innerHTML) || y.innerHTML.toLowerCase();
+
+        if (dir == "asc") {
+          if (a > b) {
+            shouldSwitch= true;
+            break;
+          }
+        } else if (dir == "desc") {
+          if (a < b) {
+            shouldSwitch = true;
+            break;
+          }
+        }
+      }
+      if (shouldSwitch) {
+
+        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+        switching = true;
+
+        switchcount ++;      
+      } else {
+
+        if (switchcount == 0 && dir == "asc") {
+          dir = "desc";
+          switching = true;
+        }
+      }
+    }
+  }

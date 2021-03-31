@@ -64,12 +64,13 @@ let DOMmain = document.createElement("main");
 // Footer
 const DOMfooter = document.createElement("footer");
 
-let footerContent = document.createElement("span");
-footerContent.textContent = "Democratic Republic of PW21";
-DOMfooter.appendChild(footerContent); 
+let footerLeft = document.createElement("span");
+footerLeft.textContent = "Democratic Republic of PW21";
+
 let footerRight = document.createElement("span");
 footerRight.textContent = "Niagara Malmö";
-DOMfooter.appendChild(footerRight);
+
+DOMfooter.append(footerLeft, footerRight);
 
 
 // Använd denna instruktion för att lägga till alla element till body
