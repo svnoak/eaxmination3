@@ -208,7 +208,7 @@ function renderTableSet(array) {
     generateTableBody(table, array);
 }
 
-// Skapar en tablehead utifrån 
+// Skapar en tablehead utifrån keys i dataset
 function generateTableHead(table, data) {
     let thead = table.createTHead();
     let row = thead.insertRow();
@@ -285,8 +285,8 @@ function generateTableBody(table, data) {
     }
 }
 
-// Lägger till en sidebar som har nkappar för att välja vilken array vi vill ha
-// Och en search bar, kommer till lite olika filterfunktioner och en exportfunktion.
+// Lägger till en sidebar som har kappar för att välja vilken array vi vill ha
+// Och en search bar, och en exportfunktion.
 function renderSidebar() {
     let sidebar = document.createElement("div");
     sidebar.className = "sidebar";
@@ -362,13 +362,13 @@ function chooseTable(array) {
         site.clearTable();
         renderTableSet(array);
         setActiveButton();
-    }
 
-// Sätter knappen som väljer tabell till active
-function setActiveButton() {
-    let btn = document.querySelectorAll(".menu button");
-    document.querySelectorAll(".menu button").forEach( btn => btn.classList.remove("active") );
-    btn.forEach( btn => { if (btn.textContent.toLowerCase() == dataset.filterKey) btn.classList.add("active") } );
+        // Sätter knappen som väljer tabell till active
+    function setActiveButton() {
+        let btn = document.querySelectorAll(".menu button");
+        document.querySelectorAll(".menu button").forEach( btn => btn.classList.remove("active") );
+        btn.forEach( btn => { if (btn.textContent.toLowerCase() == dataset.filterKey) btn.classList.add("active") } );
+    }
 }
 
 // För att kunna putta in objekten och ladda ner.
@@ -398,6 +398,7 @@ function selectRow() {
     }
 }
 
+// För att välja vilken data man faktiskt vill ha och om man vill ha det i en enskild fil eller uppdelat på flera filer.
 function exportSelection() {
     event.preventDefault();
     let students = document.querySelector("#student-selection").checked ? "students" : null;
@@ -430,6 +431,88 @@ function exportSelection() {
            chooseTable(dataset);
        };
     }
+
+// Jag har lånat denna, men skrivit om den för att anpassa den till array of objects istället för en vanlig array.
+function downloadData(arr, key) {
+    let create = {
+        students,
+        courses,
+        teachers,
+        all
+    }
+
+    let csvContent = 'data:text/csv;charset=utf-8,';
+
+    if (typeof(key) == "object") {
+        create.all();
+        key = "all";
+    }
+    else ( create[key]() );
+
+    console.log(csvContent);
+  
+    let encodedURI = encodeURI(csvContent);
+
+    let link = document.createElement('a');
+    link.setAttribute('href', encodedURI);
+    link.setAttribute('download', `${key}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    function students() {
+        arr.forEach ( obj => {
+            Object.keys(obj).forEach( key => {
+                if ( key == "courses" ) {
+                    csvContent += "Courses: \n";
+                    obj[key].forEach( course => {
+                        let courseObj = dataset.courses.find( c => course.courseID == c.courseID );
+                        csvContent += `${courseObj.title}: ${course.passedCredits} of ${courseObj.totalCredits}\n` });
+                    }
+                else if ( key != "checked" ) csvContent += `${capitaliseKeys(key)}: ${obj[key]}\n`
+            });
+            csvContent += `\n`;
+        })
+    }
+
+    function courses() {
+        arr.forEach ( obj => {
+            Object.keys(obj).forEach( key => {
+                if ( key == "teachers" ) appendTeacher(obj, key)
+                else if ( key == "courseResponsible" ) appendTeacher(obj, key)
+                else if ( key != "checked" ) csvContent += `${capitaliseKeys(key)}: ${obj[key]}\n`
+            })
+            csvContent += `\n`;
+        });
+    }
+
+    function teachers() {
+        arr.forEach ( obj => {
+            Object.keys(obj).forEach( key => {if ( key != "checked" ) csvContent += `${capitaliseKeys(key)}: ${obj[key]}\n` })
+            csvContent += `\n`;
+        });
+    }
+
+    function all() {
+        key.forEach( k => {
+            if ( k && dataset.export[k].length ) {
+                arr = dataset.export[k];
+                csvContent += `${k} \n`;
+                create[k]();
+            }
+        })
+    }
+
+    function appendTeacher(obj, key) {
+        csvContent += `${capitaliseKeys(key)}: \n`
+        arr = typeof(obj[key]) == "object" ? obj[key] : [obj[key]];
+        arr.forEach( obj => {
+                let teacher = dataset.teachers.find(teacher => teacher.teacherID == obj);
+                csvContent += `${teacher.firstName} ${teacher.lastName}\n`
+            });
+    }
+  }
+
 }
 
 // Gör keys stora som ska stå i head som rubriker/titlar
@@ -493,85 +576,3 @@ function sortTable(n) {
       }
     }
 }
-
-// Jag har lånat denna, men skrivit om den för att anpassa den till array of objects istället för en vanlig array.
-function downloadData(arr, key) {
-    let create = {
-        students,
-        courses,
-        teachers,
-        all
-    }
-
-    let csvContent = 'data:text/csv;charset=utf-8,';
-
-    if (typeof(key) == "object") {
-        create.all();
-        key = "all";
-    }
-    else ( create[key]() );
-
-    console.log(csvContent);
-  
-    let encodedURI = encodeURI(csvContent);
-
-    let link = document.createElement('a');
-    link.setAttribute('href', encodedURI);
-    link.setAttribute('download', `${key}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-
-    function students() {
-        console.log(arr);
-        arr.forEach ( obj => {
-            Object.keys(obj).forEach( key => {
-                if ( key == "courses" ) {
-                    csvContent += "Courses: \n";
-                    obj[key].forEach( course => {
-                        let courseObj = dataset.courses.find( c => course.courseID == c.courseID );
-                        csvContent += `${courseObj.title}: ${course.passedCredits} of ${courseObj.totalCredits}\n` });
-                    }
-                else if ( key != "checked" ) csvContent += `${key}: ${obj[key]}\n`
-            });
-            csvContent += `\n`;
-        })
-    }
-
-    function courses() {
-        arr.forEach ( obj => {
-            Object.keys(obj).forEach( key => {
-                if ( key == "teachers" ) appendTeacher(obj, key)
-                else if ( key == "courseResponsible" ) appendTeacher(obj, key)
-                else if ( key != "checked" ) csvContent += `${key}: ${obj[key]}\n`
-            })
-            csvContent += `\n`;
-        });
-    }
-
-    function teachers() {
-        arr.forEach ( obj => {
-            Object.keys(obj).forEach( key => {if ( key != "checked" ) csvContent += `${key}: ${obj[key]}\n` })
-            csvContent += `\n`;
-        });
-    }
-
-    function all() {
-        key.forEach( k => {
-            if ( k && dataset.export[k].length ) {
-                arr = dataset.export[k];
-                csvContent += `${k} \n`;
-                create[k]();
-            }
-        })
-    }
-
-    function appendTeacher(obj, key) {
-        csvContent += `${key}: \n`
-        arr = typeof(obj[key]) == "object" ? obj[key] : [obj[key]];
-        arr.forEach( obj => {
-                let teacher = dataset.teachers.find(teacher => teacher.teacherID == obj);
-                csvContent += `${teacher.firstName} ${teacher.lastName}\n`
-            });
-    }
-  }

@@ -70,8 +70,6 @@ function DOMCourse(course){
     
     return container;
 
-
-
     // We can put these declarations after the return because they are function declarations,
     // not "normal" executable code. "Normal" executable code is not executed
     // if it is placed after a return instruction.
@@ -91,7 +89,6 @@ function DOMCourse(course){
         // CREATING RESPONSIBLE TITLE AND NAME
         let respEl = document.createElement("div");
         respEl.classList.add("resp");
-        
         
         let respTitle = document.createElement("h3");
         respTitle.textContent = "Course Ressponsible:";
@@ -116,16 +113,6 @@ function DOMCourse(course){
         staffEl.appendChild(staffTitle);
 
         let teacherEl = document.createElement("div");
-
-
-        // course.teachers.forEach( teachersID => {
-        //     let staffSpan = document.createElement("span");
-        //     let staffFirst = TEACHERS.find( t => t.teacherID == teachersID ).firstName;
-        //     let staffLast = TEACHERS.find( t => t.teacherID == teachersID ).lastName;
-        //     let staffPost = TEACHERS.find( t => t.teacherID == teachersID ).post;
-        //     staffSpan.textContent = `${staffFirst} ${staffLast} (${staffPost})`;
-
-        
         teacherEl.appendChild( DOMTeacher( course.teachers ) );
 
         staffEl.appendChild(teacherEl);
@@ -213,7 +200,6 @@ function DOMTeacher( teacherID ){
         staff.textContent = `${firstName} ${lastName} (${post})`;
 
         container.appendChild(staff);
-
     });
 
     return container;
