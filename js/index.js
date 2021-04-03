@@ -17,7 +17,13 @@ let dataset = {
     students: STUDENTS,
     courses: COURSES,
     teachers: TEACHERS,
-    filterKey: "teachers"
+    filterKey: "teachers",
+    export: {
+        students: [],
+        courses: [],
+        teachers: [],
+        all: []
+    }
 };
 
 const details = {
@@ -92,9 +98,15 @@ function showStudentInformation(set, key, parentRow) {
                     td.appendChild(resp);
                     tr.appendChild(td);
                 }
+
+                else if (key == "totalCredits") {
+                    let td = document.createElement("td");
+                    td.textContent = `${c.passedCredits} of ${course[key]}`;
+                    tr.appendChild(td);
+                }
                 else {
                 let td = document.createElement("td");
-                td.textContent = course[key];      
+                td.textContent = course[key];
                 tr.appendChild(td);
                 }
             })
@@ -147,7 +159,6 @@ function showTeacherInformation(set, key, parentRow){
             courseKeys = Object.keys(course);
             courseKeys.splice(3, 3);
             courseKeys.push("Role", "");
-            console.log(courseKeys);
             courseKeys.forEach( key => {
                 let td = document.createElement("td");
                 td.textContent = course[key];
@@ -164,7 +175,6 @@ function showTeacherInformation(set, key, parentRow){
 // De tas bort varje gång för att vara uppdaterade nästa gång de renderas ifall datan skulle ha ändrats.
 // Finns en skillnad om alla tas bort eller om bara siblingen till den som man klickade tar bort
 function collapseRow(row, remove) {
-    event.stopPropagation();
     if (remove) {
         // Om det är sista elementet i tabellen så finns det inget sibling.
         let siblingExists = (row.nextSibling == null || row.nextSibling.className != "details") ? true : false; 
@@ -237,13 +247,11 @@ function generateTableBody(table, data) {
     let tbody = table.createTBody();
 
     for (let element of data) {
-        
+        let checked = element.checked;
         element = Object.keys(element).slice(0, 3).reduce((result, key) => {
             result[key] = element[key];
-
             return result;
         }, {});
-
     let row = tbody.insertRow();
     row.addEventListener("click", function() {
         collapseRow(this, true);
@@ -254,8 +262,9 @@ function generateTableBody(table, data) {
     let checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.className = "checkbox";
-    checkbox.addEventListener("click", selectingRow);
+    checkbox.addEventListener("click", selectRow);
     checkContainer.appendChild(checkbox);
+    checkbox.checked = checked;
 
     row.prepend(checkContainer);
 
@@ -283,13 +292,36 @@ function renderSidebar() {
     sidebar.className = "sidebar";
     sidebar.appendChild(tableChoice());
     let sidebarChoices = document.createElement("div");
-    sidebarChoices.innerHTML = `
-    <label>Search:</label>
-    <input id="searchbar" placeholder="..."></input>
+    sidebarChoices.className = "choices";
+
+    let searchBarTitle = document.createElement("label");
+    searchBarTitle.textContent = "Search:";
+    let searchBarInput = document.createElement("input");
+    searchBarInput.id = "searchbar";
+    searchBarInput.placeholder = "...";
+    sidebarChoices.append(searchBarTitle, searchBarInput);
+    
+    let exportTitle = document.createElement("span");
+    exportTitle.textContent = "Export:";
+
+    let exportSelectionForm = document.createElement("form");
+    exportSelectionForm.id ="selection-form";
+    exportSelectionForm.innerHTML = `
+    <label>Students</label><input type="checkbox" id="student-selection" checked="true">
+    <label>Courses</label><input type="checkbox" id="course-selection" checked="true">
+    <label>Teachers</label><input type="checkbox" id="teacher-selection" checked="true">
+    <label for="files">Export as</label>
+    <select name="files" id="file-type">
+    <option value="true" id="single-file">Single file</option>
+    <option value="false" id="separate-file">Seperate files</option>
+    </select>
+    <button id="export-selection">Export</button>
     `;
 
+    sidebarChoices.append(exportTitle, exportSelectionForm);    
     sidebar.appendChild(sidebarChoices);
     main.prepend(sidebar);
+    document.querySelector("#export-selection").addEventListener("click", exportSelection);
 }
 
 // Skapa knapparna som man kan välja mellan tabeller med. Den skapar så många knappar som det finns datasets.
@@ -298,7 +330,7 @@ function tableChoice() {
     menu.className = "menu";
     
     let choices = Object.keys(dataset);
-    choices.splice(choices.length-1);
+    choices.splice(3);
 
     choices.forEach( choice => {
         choice = choice.charAt(0).toUpperCase() + choice.slice(1);
@@ -324,13 +356,13 @@ function searchTable(search) {
 
 // välja vilken tabell som ska visas
 function chooseTable(array) {
-    if( event.target.textContent.toLowerCase() != dataset.filterKey ) {
-        dataset.filterKey = event.target.textContent.toLowerCase();
+    if (event.target.parentNode.className == "menu") {
+        if( event.target.textContent.toLowerCase() != dataset.filterKey ) dataset.filterKey = event.target.textContent.toLowerCase();
+    }
         site.clearTable();
         renderTableSet(array);
         setActiveButton();
     }
-}
 
 // Sätter knappen som väljer tabell till active
 function setActiveButton() {
@@ -340,8 +372,64 @@ function setActiveButton() {
 }
 
 // För att kunna putta in objekten och ladda ner.
-function selectingRow() {
+function selectRow() {
     event.stopPropagation();
+    changeState(this);
+    let currArr = dataset.filterKey; // Current Array
+    let id = this.parentNode.parentNode.children[1].textContent;
+    let key = currArr.substr(0, currArr.length-1 ) + "ID";
+    let obj = dataset[currArr].find( obj => obj[key] == id );
+
+    dataset.export[currArr].find(exp => exp == obj) ? removeFromExport(obj) : addToExport(obj);
+
+    function changeState(box) {
+        box.checked == true ? box.checked = true : box.checked = false;
+    }
+
+    function addToExport(obj) {
+        obj.checked = true;
+        dataset.export[currArr].push(obj);
+    }
+
+    function removeFromExport(obj) {
+        obj.checked = false;
+        let index = dataset.export[currArr].findIndex( exp => exp == obj );
+        dataset.export[currArr].splice(index, 1);
+    }
+}
+
+function exportSelection() {
+    event.preventDefault();
+    let students = document.querySelector("#student-selection").checked ? "students" : null;
+    let courses = document.querySelector("#course-selection").checked ? "courses" : null;
+    let teachers = document.querySelector("#teacher-selection").checked ? "teachers" : null;
+    let singleFile = document.querySelector("#file-type").value  == "true" ? true : false;
+    const selected = [students, courses, teachers];
+    
+    singleFile ? exportSingleFile() : exportMultipleFiles();
+
+    function exportSingleFile() {
+        downloadData(dataset.export, selected);
+        setTimeout( () => clearSelectionPrompt(), 2000 );
+    }
+
+    function exportMultipleFiles() {
+        selected.forEach( key => {
+            if (key) {
+                if( dataset.export[key].length ) downloadData(dataset.export[key], key);
+            }
+        })
+        clearSelectionPrompt();
+    }
+
+    function clearSelectionPrompt() {
+       if( confirm("Do you want to clear your previous selection?") ) {
+           Object.keys(dataset.export).forEach( key => {
+               dataset.export[key].forEach( obj => obj.checked = false );
+           } )
+           chooseTable(dataset);
+       };
+    }
 }
 
 // Gör keys stora som ska stå i head som rubriker/titlar
@@ -403,5 +491,87 @@ function sortTable(n) {
           switching = true;
         }
       }
+    }
+}
+
+// Jag har lånat denna, men skrivit om den för att anpassa den till array of objects istället för en vanlig array.
+function downloadData(arr, key) {
+    let create = {
+        students,
+        courses,
+        teachers,
+        all
+    }
+
+    let csvContent = 'data:text/csv;charset=utf-8,';
+
+    if (typeof(key) == "object") {
+        create.all();
+        key = "all";
+    }
+    else ( create[key]() );
+
+    console.log(csvContent);
+  
+    let encodedURI = encodeURI(csvContent);
+
+    let link = document.createElement('a');
+    link.setAttribute('href', encodedURI);
+    link.setAttribute('download', `${key}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    function students() {
+        console.log(arr);
+        arr.forEach ( obj => {
+            Object.keys(obj).forEach( key => {
+                if ( key == "courses" ) {
+                    csvContent += "Courses: \n";
+                    obj[key].forEach( course => {
+                        let courseObj = dataset.courses.find( c => course.courseID == c.courseID );
+                        csvContent += `${courseObj.title}: ${course.passedCredits} of ${courseObj.totalCredits}\n` });
+                    }
+                else if ( key != "checked" ) csvContent += `${key}: ${obj[key]}\n`
+            });
+            csvContent += `\n`;
+        })
+    }
+
+    function courses() {
+        arr.forEach ( obj => {
+            Object.keys(obj).forEach( key => {
+                if ( key == "teachers" ) appendTeacher(obj, key)
+                else if ( key == "courseResponsible" ) appendTeacher(obj, key)
+                else if ( key != "checked" ) csvContent += `${key}: ${obj[key]}\n`
+            })
+            csvContent += `\n`;
+        });
+    }
+
+    function teachers() {
+        arr.forEach ( obj => {
+            Object.keys(obj).forEach( key => {if ( key != "checked" ) csvContent += `${key}: ${obj[key]}\n` })
+            csvContent += `\n`;
+        });
+    }
+
+    function all() {
+        key.forEach( k => {
+            if ( k && dataset.export[k].length ) {
+                arr = dataset.export[k];
+                csvContent += `${k} \n`;
+                create[k]();
+            }
+        })
+    }
+
+    function appendTeacher(obj, key) {
+        csvContent += `${key}: \n`
+        arr = typeof(obj[key]) == "object" ? obj[key] : [obj[key]];
+        arr.forEach( obj => {
+                let teacher = dataset.teachers.find(teacher => teacher.teacherID == obj);
+                csvContent += `${teacher.firstName} ${teacher.lastName}\n`
+            });
     }
   }
